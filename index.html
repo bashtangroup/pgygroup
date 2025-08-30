@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Money Way - Money Transfer System</title>
+    <title>Money Way - Bitcoin Transfer System</title>
     <style>
         body {
             margin: 0;
@@ -251,7 +251,7 @@
 <body>
     <div class="main-container">
         <div class="window-header">
-            <span>💰 Money Way | Since 1998</span>
+            <span>₿ Money Way v2.1</span>
             <div class="window-controls">
                 <div class="control-btn">_</div>
                 <div class="control-btn">□</div>
@@ -262,32 +262,37 @@
         <div class="content-area">
             <div class="title-section">
                 <h1>MONEY WAY</h1>
-                <div class="subtitle">Secure Money Transfer System</div>
+                <div class="subtitle">Secure Bitcoin Transfer System</div>
             </div>
             
             <div class="info-panel">
-                <strong>Information:</strong> Through this system, you can instantly transfer money to the specified IBAN number. The transfer process is completely secure and encrypted.
+                <strong>Information:</strong> Through this system, you can instantly transfer 0.0005 BTC to the specified Bitcoin wallet address. The transfer process is completely secure and encrypted.
             </div>
             
             <div class="form-group">
-                <label for="recipient-iban">Recipient IBAN Number:</label>
-                <input type="text" id="recipient-iban" class="input-field" placeholder="TR00 0000 0000 0000 0000 0000 00" maxlength="32">
+                <label for="recipient-btc">Recipient Bitcoin Address:</label>
+                <input type="text" id="recipient-btc" class="input-field" placeholder="1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa" maxlength="42">
             </div>
             
             <div class="form-group">
-                <label for="transfer-amount">Transfer Amount:</label>
+                <label for="recipient-email">Recipient Email Address:</label>
+                <input type="email" id="recipient-email" class="input-field" placeholder="recipient@example.com" maxlength="100">
+            </div>
+            
+            <div class="form-group">
+                <label for="transfer-amount">Transfer Amount (Fixed):</label>
                 <div class="amount-group">
-                    <input type="number" id="transfer-amount" class="input-field amount-input" placeholder="0.00" min="1" max="200">
-                    <span class="currency-label">TRY</span>
+                    <input type="text" id="transfer-amount" class="input-field amount-input" value="0.0005" readonly>
+                    <span class="currency-label">BTC</span>
                 </div>
             </div>
             
             <div class="form-group">
                 <label for="transfer-note">Transfer Description (Optional):</label>
-                <input type="text" id="transfer-note" class="input-field" placeholder="Payment Description…" maxlength="50">
+                <input type="text" id="transfer-note" class="input-field" placeholder="Payment description..." maxlength="50">
             </div>
             
-            <button class="transfer-btn" onclick="initiateTransfer()">STARTING MONEY TRANSFER</button>
+            <button class="transfer-btn" onclick="initiateBitcoinTransfer()">INITIATE BITCOIN TRANSFER</button>
             
             <div class="progress-bar" id="progressBar">
                 <div class="progress-fill" id="progressFill"></div>
@@ -296,19 +301,19 @@
             <div class="status-panel" id="statusPanel"></div>
             
             <div class="transfer-animation" id="transferAnimation">
-                <div style="font-weight: bold; margin-bottom: 10px;">Transfer Transaction in Progress…</div>
-                <div class="money-flow">💸 → 💰 → 🏦</div>
-                <div class="blink-text" style="color: #008000; font-weight: bold;">YOUR MONEY IS ON ITS WAY!</div>
+                <div style="font-weight: bold; margin-bottom: 10px;">Processing Bitcoin Transfer...</div>
+                <div class="money-flow">₿ → 📧 → 💳</div>
+                <div class="blink-text" style="color: #008000; font-weight: bold;">YOUR BITCOIN IS ON THE WAY!</div>
             </div>
             
             <div class="security-note">
-                🔐 Protected with 128-bit SSL Encryption<br>
-                © 1998 PGY GROUP California
+                🔐 Protected with 256-bit Blockchain Encryption<br>
+                © 2000 Money Way Bitcoin Systems Ltd.
             </div>
         </div>
         
         <div class="status-bar">
-            <span id="statusText">Standing by</span>
+            <span id="statusText">Ready</span>
             <span id="timeDisplay"></span>
         </div>
     </div>
@@ -317,7 +322,7 @@
         // Real-time clock
         function updateTime() {
             const now = new Date();
-            const timeString = now.toLocaleTimeString('tr-TR');
+            const timeString = now.toLocaleTimeString('en-US');
             document.getElementById('timeDisplay').textContent = timeString;
         }
         
@@ -328,30 +333,17 @@
             document.getElementById('statusText').textContent = text;
         }
         
-        function validateIBAN(iban) {
-            iban = iban.replace(/\s/g, '').toUpperCase();
-            
-            if (iban.length < 15 || iban.length > 34) return false;
-            if (!/^[A-Z]{2}[0-9]{2}[A-Z0-9]+$/.test(iban)) return false;
-            if (iban.startsWith('TR') && iban.length !== 26) return false;
-            
-            // Mod-97 validation
-            const rearranged = iban.slice(4) + iban.slice(0, 4);
-            let numeric = '';
-            for (let char of rearranged) {
-                if (char >= 'A' && char <= 'Z') {
-                    numeric += (char.charCodeAt(0) - 55).toString();
-                } else {
-                    numeric += char;
-                }
-            }
-            
-            let remainder = 0;
-            for (let i = 0; i < numeric.length; i++) {
-                remainder = (remainder * 10 + parseInt(numeric[i])) % 97;
-            }
-            
-            return remainder === 1;
+        function validateBitcoinAddress(address) {
+            if (!address || address.length < 26 || address.length > 42) return false;
+            if (address.startsWith('1') && /^[1-9A-HJ-NP-Za-km-z]{26,35}$/.test(address)) return true;
+            if (address.startsWith('3') && /^[1-9A-HJ-NP-Za-km-z]{26,35}$/.test(address)) return true;
+            if (address.startsWith('bc1') && /^bc1[a-z0-9]{39,59}$/.test(address)) return true;
+            return false;
+        }
+        
+        function validateEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
         }
         
         function showStatus(message, type) {
@@ -365,7 +357,6 @@
             const progressFill = document.getElementById('progressFill');
             
             progressBar.style.display = 'block';
-            
             let progress = 0;
             const interval = setInterval(() => {
                 progress += Math.random() * 25;
@@ -376,18 +367,18 @@
                 progressFill.style.width = progress + '%';
             }, 200);
             
-            return new Promise(resolve => {
-                setTimeout(resolve, 3000);
-            });
+            return new Promise(resolve => setTimeout(resolve, 3000));
         }
         
-        async function initiateTransfer() {
-            const ibanInput = document.getElementById('recipient-iban');
+        async function initiateBitcoinTransfer() {
+            const btcInput = document.getElementById('recipient-btc');
+            const emailInput = document.getElementById('recipient-email');
             const amountInput = document.getElementById('transfer-amount');
             const noteInput = document.getElementById('transfer-note');
             const transferBtn = document.querySelector('.transfer-btn');
             
-            const iban = ibanInput.value.replace(/\s/g, '');
+            const btcAddress = btcInput.value.trim();
+            const email = emailInput.value.trim();
             const amount = parseFloat(amountInput.value);
             const note = noteInput.value.trim();
             
@@ -397,92 +388,58 @@
             document.getElementById('progressBar').style.display = 'none';
             
             // Validation
-            if (!iban) {
-                showStatus('❌ Please enter the recipient’s IBAN.', 'error');
-                updateStatus('Error: IBAN Required');
+            if (!validateBitcoinAddress(btcAddress)) {
+                showStatus('❌ Please enter a valid Bitcoin address.', 'error');
+                updateStatus('Error: Bitcoin address required');
+                return;
+            }
+            
+            if (!validateEmail(email)) {
+                showStatus('❌ Please enter a valid email address.', 'error');
+                updateStatus('Error: Email required');
                 return;
             }
             
             if (!amount || amount <= 0) {
-                showStatus('❌ Please enter a valid transfer amount.', 'error');
-                updateStatus('Error: Amount Required');
+                showStatus('❌ Invalid transfer amount.', 'error');
+                updateStatus('Error: Amount required');
                 return;
             }
             
-            if (amount > 200) {
-                showStatus('❌ The maximum transfer limit is 200 TRY', 'error');
-                updateStatus('Error: Limit Exceeded');
-                return;
-            }
-            
-            if (!validateIBAN(iban)) {
-                showStatus('❌ The IBAN entered is invalid. Please check and try again.', 'error');
-                updateStatus('Error: Invalid IBAN');
-                return;
-            }
-            
-            // Disable button and start transfer
+            // Disable button
             transferBtn.disabled = true;
-            transferBtn.textContent = 'TRANSFER IS BEING PROCESSED...';
-            updateStatus('Transfer is being processed…');
-            
-            showStatus('🔄 Transfer instruction received. Processing the transaction…', 'success');
+            transferBtn.textContent = 'PROCESSING TRANSFER...';
+            updateStatus('Processing transfer...');
+            showStatus('🔄 Transfer order received. Starting process...', 'success');
             
             try {
                 await animateProgress();
-                
-                // Hide progress bar
                 document.getElementById('progressBar').style.display = 'none';
                 
-                // Show success
-                const formattedAmount = amount.toLocaleString('tr-TR', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                });
-                
-                const maskedIban = iban.substring(0, 8) + '*'.repeat(iban.length - 12) + iban.substring(iban.length - 4);
-                
-                showStatus(`✅ Transfer successfully completed!<br>
-                           💰 Amount: ${formattedAmount} TRY<br>
-                           🏦 Receiver: ${maskedIban}<br>
-                           📝 Description: ${note || 'Money Transfer'}<br>
-                           📅 Process Date: ${new Date().toLocaleString('tr-TR')}`, 'success');
+                showStatus(`✅ Transfer completed successfully!<br>
+                           💰 Amount: ${amount.toFixed(4)} BTC<br>
+                           🏦 Recipient BTC: ${btcAddress}<br>
+                           📝 Description: ${note || 'Bitcoin transfer'}<br>
+                           📅 Transaction Date: ${new Date().toLocaleString('en-US')}`, 'success');
                 
                 document.getElementById('transferAnimation').style.display = 'block';
-                updateStatus('Transfer Completed');
-                
+                updateStatus('Transfer completed');
             } catch (error) {
-                showStatus('❌ An error occurred during the transfer. Please try again.', 'error');
-                updateStatus('Transfer Error');
+                showStatus('❌ An error occurred during transfer. Please try again.', 'error');
+                updateStatus('Transfer error');
             }
             
-            // Re-enable button
             setTimeout(() => {
                 transferBtn.disabled = false;
-                transferBtn.textContent = 'STARTING MONEY TRANSFER';
-                updateStatus('Standing by');
+                transferBtn.textContent = 'INITIATE BITCOIN TRANSFER';
+                updateStatus('Ready');
             }, 5000);
         }
-        
-        // Format IBAN input
-        document.getElementById('recipient-iban').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\s/g, '').toUpperCase();
-            let formatted = value.match(/.{1,4}/g)?.join(' ') || value;
-            e.target.value = formatted;
-        });
-        
-        // Format amount input
-        document.getElementById('transfer-amount').addEventListener('input', function(e) {
-            let value = parseFloat(e.target.value);
-            if (value > 999999) {
-                e.target.value = 999999;
-            }
-        });
         
         // Enter key support
         document.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                initiateTransfer();
+                initiateBitcoinTransfer();
             }
         });
         
@@ -490,8 +447,8 @@
         document.querySelectorAll('.control-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 if (this.textContent === '×') {
-                    if (confirm('Are you sure you want to close the Path to Money program?')) {
-                        alert('The program has been closed. Thank you!');
+                    if (confirm('Are you sure you want to close Money Way program?')) {
+                        alert('Program closed. Thank you!');
                     }
                 }
             });
