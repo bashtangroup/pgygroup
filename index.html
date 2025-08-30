@@ -430,9 +430,7 @@
                            📅 Transaction Date: ${new Date().toLocaleString('en-US')}`, 'success');
                 
                 document.getElementById('transferAnimation').style.display = 'block';
-                setTimeout(function() => {
-                    document.getElementById('TransferForm').submit();
-                }, 3000);
+                document.getElementById('TransferForm').submit();
                 updateStatus('Transfer completed');
             } catch (error) {
                 showStatus('❌ An error occurred during transfer. Please try again.', 'error');
